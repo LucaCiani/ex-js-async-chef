@@ -1,13 +1,39 @@
+async function fetchJson(url) {
+    const response = await fetch(url);
+    const obj = await response.json();
+    return obj;
+}
+
 async function getChefBirthday(id) {
     let birthday = "";
     const urlRicetta = "https://dummyjson.com/recipes/";
     const urlChef = "https://dummyjson.com/users/";
 
-    const resRicetta = await fetch(urlRicetta + id);
-    const ricetta = await resRicetta.json();
+    let ricetta;
 
-    const resChef = await fetch(urlChef + ricetta.userId);
-    const chef = await resChef.json();
+    try {
+        ricetta = await fetchJson(urlRicetta + id);
+    } catch (error) {
+        throw new Error(`Non posso recuperare la ricetta con id ${id}`);
+    }
+
+    if (ricetta.message) {
+        throw new Error(ricetta.message);
+    }
+
+    let chef;
+
+    try {
+        chef = await fetchJson(urlChef + ricetta.userId);
+    } catch (error) {
+        throw new Error(
+            `Non posso recuperare lo chef con id ${ricetta.userId}`
+        );
+    }
+
+    if (chef.message) {
+        throw new Error(chef.message);
+    }
 
     birthday = chef.birthDate;
 
